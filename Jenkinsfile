@@ -10,30 +10,35 @@ pipeline {
     stages {
         stage('Validate Project') {
             steps {
+                echo "Validating project..."
                 sh 'mvn validate'
             }
         }
 
         stage('Unit Test') {
             steps {
+                echo "Running unit tests..."
                 sh 'mvn test'
             }
         }
 
         stage('Integration Test') {
             steps {
+                echo "Running integration tests..."
                 sh 'mvn verify -DskipUnitTests'
             }
         }
 
         stage('App Packaging') {
             steps {
+                echo "Packaging the application..."
                 sh 'mvn package'
             }
         }
 
         stage('Checkstyle Code Analysis') {
             steps {
+                echo "Running Checkstyle code analysis..."
                 sh 'mvn checkstyle:checkstyle'
             }
         }
@@ -42,9 +47,11 @@ pipeline {
             steps {
                 script {
                     // Override Java for SonarQube scan to Java 11
+                    echo "Setting JAVA_HOME to Java 11 for SonarQube scan"
                     env.JAVA_HOME = "/usr/lib/jvm/java-11-amazon-corretto.x86_64"
                     env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
                 }
+                echo "Running SonarQube scan..."
                 sh """mvn sonar:sonar \
                      -Dsonar.projectKey=Maven-JavaWebApp \
                      -Dsonar.host.url=http://172.31.22.101:9000 \
@@ -54,13 +61,28 @@ pipeline {
 
         stage("Upload Artifact To Nexus") {
             steps {
+                echo "Uploading artifact to Nexus..."
                 sh 'mvn deploy'
             }
             post {
                 success {
-                    echo 'Successfully Uploaded Artifact to Nexus Artifactory'
+                    echo 'Successfully uploaded artifact to Nexus Artifactory'
+                }
+                failure {
+                    echo 'Failed to upload artifact to Nexus Artifactory'
                 }
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline finished'
+        }
+        success {
+            echo 'Pipeline completed successfully'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }

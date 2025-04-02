@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?> 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -15,10 +15,13 @@
 	<description>JavaWebApp project for Spring Boot</description>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>1.8</java.version> <!-- You can keep this as 1.8 if you're using Java 8 for app build, but you need to handle Java 11 for SonarQube scanning -->
 		<sonar.scanner.force-deprecated-java-version>true</sonar.scanner.force-deprecated-java-version>
-		<!-- Add this line to pass the additional options to SonarQube -->
-        <sonar.java.additionalOptions>-Djdk.module.illegalAccess=permit</sonar.java.additionalOptions>
+		<!-- Add the necessary options for Java 17 compatibility -->
+		<sonar.java.additionalOptions>
+			-Djdk.module.illegalAccess=permit 
+			--add-opens java.base/java.lang=ALL-UNNAMED
+		</sonar.java.additionalOptions>
 	</properties>
 
 	<dependencies>
@@ -47,29 +50,24 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			
-			<!--plugin>
-			  <groupId>org.codehaus.sonar</groupId>
-			  <artifactId>sonar-maven-plugin</artifactId>
-			  <version>2.5</version>
-		     	</plugin-->
-			<!--plugin>
-   				<groupId>org.apache.maven.plugins</groupId>
-   				<artifactId>maven-deploy-plugin</artifactId>
-   				<version>${maven-deploy-plugin.version}</version>
-   			</plugin-->
+			<!-- Add SonarQube Scanner Plugin for Maven -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version> <!-- Make sure this is the latest compatible version -->
+			</plugin>
 		</plugins>
 	</build>
 
 	<distributionManagement>
-    <snapshotRepository>
-      <id>nexusdeploymentrepo</id>
-      <url>http://172.31.7.3:8081/repository/maven-java-webapp-repository/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
-    </snapshotRepository>											  <!-- Mmake sure to create the "maven-snapshots" repo in Nexus -->
-	<repository>
-	  <id>nexusdeploymentrepo</id>
-      <url>http://172.31.7.3:8081/repository/maven-java-webapp-repository/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
-    </repository>													 <!-- Also make sure you have the above two or one repositories created -->
-  
-  </distributionManagement>
+		<snapshotRepository>
+			<id>nexusdeploymentrepo</id>
+			<url>http://172.31.7.3:8081/repository/maven-java-webapp-repository/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
+		</snapshotRepository> <!-- Make sure to create the "maven-snapshots" repo in Nexus -->
+		<repository>
+			<id>nexusdeploymentrepo</id>
+			<url>http://172.31.7.3:8081/repository/maven-java-webapp-repository/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
+		</repository> <!-- Also make sure you have the above two or one repositories created -->
+	</distributionManagement>
 
 </project>
