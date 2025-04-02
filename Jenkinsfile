@@ -3,8 +3,9 @@ pipeline {
         label 'Maven-Build-Env' // Use the Maven slave node for this pipeline
     }
     environment {
-        JAVA_HOME = "/usr/lib/jvm/java-17-amazon-corretto"
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+        // Set Java 17 as default for Jenkins and Maven build
+        JAVA_HOME = '/usr/lib/jvm/java-17-amazon-corretto.x86_64'
+        PATH = "${JAVA_HOME}/bin:${PATH}"
     }
     stages {
         stage('Validate Project') {
@@ -40,14 +41,14 @@ pipeline {
         stage('SonarQube Inspection') {
             steps {
                 script {
-                    // Override Java version for SonarQube only
-                    withEnv(["JAVA_HOME=/usr/lib/jvm/java-11-openjdk", "PATH=/usr/lib/jvm/java-11-openjdk/bin:${env.PATH}"]) {
-                        sh """mvn sonar:sonar \
-                             -Dsonar.projectKey=Maven-JavaWebApp \
-                             -Dsonar.host.url=http://172.31.22.101:9000 \
-                             -Dsonar.login=ed7f1ae74cf8b693cadbd47043d4b9ed5ef50913"""
-                    }
+                    // Override Java for SonarQube scan to Java 11
+                    env.JAVA_HOME = "/usr/lib/jvm/java-11-amazon-corretto.x86_64"
+                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
                 }
+                sh """mvn sonar:sonar \
+                     -Dsonar.projectKey=Maven-JavaWebApp \
+                     -Dsonar.host.url=http://172.31.22.101:9000 \
+                     -Dsonar.login=ed7f1ae74cf8b693cadbd47043d4b9ed5ef50913"""
             }
         }
 
